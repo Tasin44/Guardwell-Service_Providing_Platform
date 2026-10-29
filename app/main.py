@@ -28,7 +28,8 @@ from app.core.security import get_password_hash
 from app.models.user import User, UserRole
 from app.models.quote import NotificationRecipient
 # from app.api.v1.api import api_router
-
+# লাইন ৩০-এ:
+from app.api.v1.endpoints.auth import router as auth_router
 
 def seed_initial_data():
     """
@@ -107,9 +108,9 @@ os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
 # Include master API router
-app.include_router(api_router, prefix=settings.API_V1_STR)
-app.include_router(api_router)  # Also mount directly for root compatibility
-
+# app.include_router(api_router, prefix=settings.API_V1_STR)
+# app.include_router(api_router)  # Also mount directly for root compatibility
+app.include_router(auth_router, prefix=f"{settings.API_V1_STR}/auth", tags=["Authentication"])
 
 @app.get("/", tags=["Health Check"])
 def root():

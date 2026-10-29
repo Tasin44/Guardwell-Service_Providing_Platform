@@ -12,9 +12,9 @@ ARCHITECTURE & DESIGN PATTERN:
 ================================================================================
 """
 
-from sys.__jit import is_active
-from sqlalchemy import null
-from _winapi import TerminateProcess
+# from sys.__jit import is_active
+# from sqlalchemy import null
+# from _winapi import TerminateProcess
 import enum
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, Boolean, Enum, ForeignKey, Integer, DateTime
