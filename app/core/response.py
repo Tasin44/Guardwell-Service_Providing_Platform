@@ -107,6 +107,7 @@ class StandardResponseMiddleware(BaseHTTPMiddleware):
         path = request.url.path
         if (
             path in ["/docs", "/redoc", "/openapi.json"]
+            or path.startswith("/admin")
             or path.startswith("/uploads")
             or path.endswith("/openapi.json")
         ):

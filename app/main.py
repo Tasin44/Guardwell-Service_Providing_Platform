@@ -139,3 +139,28 @@ def root():
 @app.get("/health", tags=["Health Check"])
 def health_check():
     return {"status": "ok"}
+
+
+# ==========================================
+# SQLADMIN DASHBOARD MOUNT (DJANGO ADMIN EQUIVALENT)
+# ==========================================
+from sqladmin import Admin
+from app.core.admin import (
+    authentication_backend,
+    UserAdmin,
+    OTPVerificationAdmin,
+    QuoteAdmin,
+    NotificationRecipientAdmin,
+)
+
+admin_dashboard = Admin(
+    app,
+    engine,
+    title=f"{settings.PROJECT_NAME} Admin",
+    authentication_backend=authentication_backend,
+)
+admin_dashboard.add_view(UserAdmin)
+admin_dashboard.add_view(OTPVerificationAdmin)
+admin_dashboard.add_view(QuoteAdmin)
+admin_dashboard.add_view(NotificationRecipientAdmin)
+
