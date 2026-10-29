@@ -49,8 +49,6 @@ def seed_initial_data():
                 referral_code="GWADMIN1",
                 is_active=True,
                 is_verified_otp=True,
-                is_verified_customer=True,
-                is_feed_banned=False,
             )
             db.add(admin_user)
             db.commit()

@@ -52,10 +52,10 @@ class User(TimeStampedModel):
     # referrals_given = relationship("Referral", foreign_keys="Referral.referrer_id", back_populates="referrer", cascade="all, delete-orphan")
     # referrals_received = relationship("Referral", foreign_keys="Referral.referred_user_id", back_populates="referred_user")
 
-    quotes = relationship("Quote", back_populates="user")#❓what does backpulates means here
-    posts = relationship("FeedPost", back_populates="user", cascade="all, delete-orphan")
-    comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
-    reactions = relationship("CommentReaction", back_populates="user", cascade="all, delete-orphan")
+    quotes = relationship("Quote", back_populates="user")
+    # posts = relationship("FeedPost", back_populates="user", cascade="all, delete-orphan")
+    # comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
+    # reactions = relationship("CommentReaction", back_populates="user", cascade="all, delete-orphan")
     otps = relationship("OTPVerification", back_populates="user", cascade="all, delete-orphan")
 
 

@@ -71,7 +71,7 @@ class Quote(TimeStampedModel):
 
     # Relationships
     user = relationship("User", back_populates="quotes")
-    coupon = relationship("Coupon", back_populates="quotes")
+    # coupon = relationship("Coupon", back_populates="quotes")
 
 
 class NotificationRecipient(TimeStampedModel):
