@@ -94,8 +94,8 @@ class AuthService:
             referral_code=unique_ref_code,
             is_active=True,
             is_verified_otp=False,
-            is_verified_customer=False,
-            is_feed_banned=False,
+            # is_verified_customer=False,
+            # is_feed_banned=False,
         )
         db.add(new_user)
         db.commit()

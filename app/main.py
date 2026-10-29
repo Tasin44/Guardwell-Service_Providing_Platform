@@ -101,6 +101,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Standard Response Envelope Middleware (Matches DRF StandardResponseMixin)
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from app.core.response import (
+    StandardResponseMiddleware,
+    custom_http_exception_handler,
+    custom_validation_exception_handler,
+    custom_general_exception_handler
+)
+
+app.add_middleware(StandardResponseMiddleware)
+app.add_exception_handler(StarletteHTTPException, custom_http_exception_handler)
+app.add_exception_handler(RequestValidationError, custom_validation_exception_handler)
+app.add_exception_handler(Exception, custom_general_exception_handler)
+
 # Mount Static Uploads Directory
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
