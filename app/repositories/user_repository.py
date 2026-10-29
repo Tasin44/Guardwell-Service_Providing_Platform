@@ -35,11 +35,12 @@ class UserRepository(BaseRepository[User]):
         self,
         db: Session,
         *,
-        user_id: int,
         email: str,
         otp_code: str,
         purpose: OTPPurpose,
-        expires_at: datetime
+        expires_at: datetime,
+        user_id: Optional[int] = None,
+        payload: Optional[str] = None
     ) -> OTPVerification:
         """Stores a new OTP record."""
         otp_record = OTPVerification(
@@ -47,6 +48,7 @@ class UserRepository(BaseRepository[User]):
             email=email.strip().lower(),
             otp_code=otp_code,
             purpose=purpose,
+            payload=payload,
             expires_at=expires_at,
             is_used=False
         )

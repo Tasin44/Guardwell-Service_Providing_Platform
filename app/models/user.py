@@ -64,10 +64,13 @@ class User(TimeStampedModel):
 class OTPVerification(TimeStampedModel):
     __tablename__ = "otp_verifications"
 
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    # user_id is nullable: None during signup (unverified), populated for existing users
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True)
     email = Column(String(255), nullable=False, index=True)
     otp_code = Column(String(6), nullable=False)
     purpose = Column(Enum(OTPPurpose), nullable=False)
+    # Temporary signup payload (name, hashed_password, phone_number, referral_code) until verified
+    payload = Column(String(2000), nullable=True)
     is_used = Column(Boolean, default=False, nullable=False)
     expires_at = Column(DateTime, nullable=False)
 

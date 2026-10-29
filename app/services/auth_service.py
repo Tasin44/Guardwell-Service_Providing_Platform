@@ -66,88 +66,69 @@ class AuthService:
 
     def signup(self, db: Session, payload: UserSignupRequest) -> dict:
         """
-        Registers a new user, generates a 6-digit OTP, and stores pending referral state.
+        Option B Implementation:
+        Does NOT insert into users table yet!
+        Stores hashed password and registration info temporarily with OTP.
+        Only when user verifies OTP is the User actually inserted into users table.
         """
-        # Fail Fast: Check duplicate email
-        if user_repository.get_by_email(db, payload.email):
+        # Fail Fast: Check duplicate verified email
+        existing_user = user_repository.get_by_email(db, payload.email)
+        if existing_user and existing_user.is_verified_otp:
             raise http_409_conflict(f"An account with email '{payload.email}' already exists.")
 
-        # Fail Fast: Check duplicate phone
-        if user_repository.get_by_phone(db, payload.phone_number):
+        # Fail Fast: Check duplicate verified phone
+        existing_phone_user = user_repository.get_by_phone(db, payload.phone_number)
+        if existing_phone_user and existing_phone_user.is_verified_otp:
             raise http_409_conflict(f"An account with phone number '{payload.phone_number}' already exists.")
 
         # Validate referral code if provided
-        referrer_user = None
         if payload.referral_code:
             referrer_user = user_repository.get_by_referral_code(db, payload.referral_code)
             if not referrer_user:
                 raise http_400_bad_request("The provided referral code is invalid.")
 
-        # Create user record (marked unverified until OTP check)
-        unique_ref_code = self._generate_referral_code(db)
-        new_user = User(
-            name=payload.name,
-            email=payload.email.strip().lower(),
-            phone_number=payload.phone_number.strip(),
-            hashed_password=get_password_hash(payload.password),
-            role=UserRole.CUSTOMER,
-            referral_code=unique_ref_code,
-            is_active=True,
-            is_verified_otp=False,
-            # is_verified_customer=False,
-            # is_feed_banned=False,
-        )
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-
-        # Pre-link referral if referrer found
-        '''        
-        if referrer_user:
-            referral_entry = Referral(
-                referrer_id=referrer_user.id,
-                referred_user_id=new_user.id,
-                referred_email=new_user.email,
-                referred_phone=new_user.phone_number,
-                status=ReferralStatus.SIGNED_UP,
-                bonus_status=BonusStatus.PENDING,
-                bonus_amount=settings.DEFAULT_COUPON_AMOUNT,
-            )
-            db.add(referral_entry)
-            db.commit()
-        '''
-
+        # Hash password and prepare temporary payload
+        import json
+        signup_data = {
+            "name": payload.name,
+            "email": payload.email.strip().lower(),
+            "phone_number": payload.phone_number.strip(),
+            "hashed_password": get_password_hash(payload.password),
+            "referral_code": payload.referral_code.strip() if payload.referral_code else None
+        }
 
         # Generate 6-Digit OTP
         otp_code = generate_six_digit_otp()
         expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.OTP_EXPIRE_MINUTES)
+        
         user_repository.create_otp(
             db,
-            user_id=new_user.id,
-            email=new_user.email,
+            email=payload.email,
             otp_code=otp_code,
             purpose=OTPPurpose.SIGNUP,
-            expires_at=expires_at
+            payload=json.dumps(signup_data),
+            expires_at=expires_at,
+            user_id=None
         )
 
-        # In production, dispatch SMS/Email. In dev, log clearly to console.
-        logger.info(f"==> [OTP DISPATCH - SIGNUP] Sent OTP {otp_code} to {new_user.email}")
+        logger.info(f"==> [OTP DISPATCH - SIGNUP] Sent OTP {otp_code} to {payload.email}")
         print(f"\n==========================================")
-        print(f" [GUARDWELL OTP - SIGNUP] ")
-        print(f" User: {new_user.email} | OTP: {otp_code}")
+        print(f" [GUARDWELL OTP - SIGNUP (PENDING REGISTRATION)] ")
+        print(f" User: {payload.email} | OTP: {otp_code}")
         print(f"==========================================\n")
 
         return {
-            "message": "Signup successful. Please verify the 6-digit OTP sent to your email.",
-            "email": new_user.email,
+            "message": "Signup initiated. Please verify the 6-digit OTP sent to your email to complete registration.",
+            "email": payload.email.strip().lower(),
             "dev_otp_preview": otp_code if settings.DEBUG else None
         }
 
     def verify_otp(self, db: Session, payload: VerifyOTPRequest) -> TokenResponse:
         """
-        Verifies 6-digit signup OTP, activates account, awards $100 referral coupon if applicable,
-        and returns access + refresh tokens and user profile.
+        Verifies 6-digit signup OTP.
+        Upon verification, the User is officially created and saved in the database!
         """
+        import json
         otp_record = user_repository.get_valid_otp(
             db,
             email=payload.email,
@@ -157,44 +138,41 @@ class AuthService:
         if not otp_record:
             raise http_400_bad_request("Invalid or expired 6-digit OTP code.")
 
-        # Mark OTP as consumed
+        # Extract pending signup payload
+        if not otp_record.payload:
+            raise http_400_bad_request("No pending registration found for this OTP.")
+
+        signup_info = json.loads(otp_record.payload)
+
+        # Check again if another user verified with this email in the meantime
+        if user_repository.get_by_email(db, signup_info["email"]):
+            raise http_409_conflict("This email has already been verified by another session.")
+
+        # Officially create User in DB now
+        unique_ref_code = self._generate_referral_code(db)
+        new_user = User(
+            name=signup_info["name"],
+            email=signup_info["email"],
+            phone_number=signup_info["phone_number"],
+            hashed_password=signup_info["hashed_password"],
+            role=UserRole.CUSTOMER,
+            referral_code=unique_ref_code,
+            is_active=True,
+            is_verified_otp=True,
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+
+        # Mark OTP as consumed and link to newly created user_id
+        otp_record.user_id = new_user.id
         user_repository.mark_otp_used(db, otp_record)
 
-        user = user_repository.get_by_email(db, payload.email)
-        if not user:
-            raise http_404_not_found("User account not found.")
-
-        user.is_verified_otp = True
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-
-        '''
-        # If user was referred, ensure they receive their $100 Welcome Coupon
-        referral_record = referral_repository.get_by_referred_user(db, user.id)
-        if referral_record:
-            # Check if coupon already granted
-            existing_coupon = coupon_repository.get_active_coupons_by_user(db, user.id)
-            if not existing_coupon:
-                coupon_code = f"WELCOME-{user.referral_code}"
-                new_coupon = Coupon(
-                    user_id=user.id,
-                    code=coupon_code,
-                    amount=settings.DEFAULT_COUPON_AMOUNT,
-                    status=CouponStatus.ACTIVE,
-                    expires_at=datetime.now(timezone.utc) + timedelta(days=90)
-                )
-                db.add(new_coupon)
-                db.commit()
-                logger.info(f"Granted ${settings.DEFAULT_COUPON_AMOUNT} referral coupon {coupon_code} to user {user.email}")
-        '''
-
-
         # Issue JWT Access & Refresh Tokens
-        access_token = create_access_token(subject=user.id, claims={"role": user.role.value, "email": user.email})
-        refresh_token = create_refresh_token(subject=user.id)
+        access_token = create_access_token(subject=new_user.id, claims={"role": new_user.role.value, "email": new_user.email})
+        refresh_token = create_refresh_token(subject=new_user.id)
 
-        user_profile = UserProfileResponse.model_validate(user)
+        user_profile = UserProfileResponse.model_validate(new_user)
         return TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,

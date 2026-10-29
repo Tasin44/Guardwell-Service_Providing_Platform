@@ -27,8 +27,8 @@ class UserProfileResponse(BaseModel):
     referral_code: str
     image_url: Optional[str] = None
     is_verified_otp: bool
-    is_verified_customer: bool
-    is_feed_banned: bool
+    is_verified_customer: bool = False
+    is_feed_banned: bool = False
     payout_email: Optional[str] = None
     payout_phone: Optional[str] = None
     created_at: datetime
