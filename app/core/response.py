@@ -173,6 +173,47 @@ class StandardResponseMiddleware(BaseHTTPMiddleware):
         return response
 
 
+import re
+from sqlalchemy.exc import IntegrityError
+
+
+async def custom_integrity_exception_handler(request: Request, exc: IntegrityError):
+    """
+    Translates raw database IntegrityError (like UNIQUE constraints)
+    into a clean, readable message.
+    """
+    raw_msg = str(exc.orig) if hasattr(exc, "orig") else str(exc)
+    
+    # Check for UNIQUE constraint failed: table.column
+    unique_match = re.search(r"UNIQUE constraint failed:\s*([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)", raw_msg, re.IGNORECASE)
+    if unique_match:
+        table_name, column_name = unique_match.group(1), unique_match.group(2)
+        readable_field = column_name.replace("_", " ").title()
+        user_friendly_msg = f"An account with this {readable_field} already exists."
+        return error_response(
+            message=user_friendly_msg,
+            status_code=status.HTTP_409_CONFLICT,
+            data={"field": column_name, "error": f"{readable_field} must be unique."}
+        )
+    
+    # Check for NOT NULL constraint
+    not_null_match = re.search(r"NOT NULL constraint failed:\s*([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)", raw_msg, re.IGNORECASE)
+    if not_null_match:
+        column_name = not_null_match.group(2)
+        readable_field = column_name.replace("_", " ").title()
+        return error_response(
+            message=f"{readable_field} cannot be empty.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            data={"field": column_name}
+        )
+
+    return error_response(
+        message="Database constraint violation occurred.",
+        status_code=status.HTTP_409_CONFLICT,
+        data={"detail": raw_msg}
+    )
+
+
 # Global Exception Handlers to match DRF error response
 async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
     message = exc.detail if isinstance(exc.detail, str) else "An HTTP error occurred"
@@ -192,6 +233,6 @@ async def custom_validation_exception_handler(request: Request, exc: RequestVali
 
 async def custom_general_exception_handler(request: Request, exc: Exception):
     return error_response(
-        message=f"Internal Server Error: {str(exc)}",
+        message=f"An unexpected error occurred: {str(exc)}",
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     )

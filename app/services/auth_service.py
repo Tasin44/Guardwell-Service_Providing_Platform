@@ -12,6 +12,7 @@ ARCHITECTURE & DESIGN PATTERN:
 ================================================================================
 """
 
+from app.core import database
 import string
 import secrets
 import logging
@@ -145,24 +146,42 @@ class AuthService:
         signup_info = json.loads(otp_record.payload)
 
         # Check again if another user verified with this email in the meantime
-        if user_repository.get_by_email(db, signup_info["email"]):
-            raise http_409_conflict("This email has already been verified by another session.")
+        # if user_repository.get_by_email(db, signup_info["email"]):
+        #     raise http_409_conflict("This email has already been verified by another session.")
 
-        # Officially create User in DB now
-        unique_ref_code = self._generate_referral_code(db)
-        new_user = User(
-            name=signup_info["name"],
-            email=signup_info["email"],
-            phone_number=signup_info["phone_number"],
-            hashed_password=signup_info["hashed_password"],
-            role=UserRole.CUSTOMER,
-            referral_code=unique_ref_code,
-            is_active=True,
-            is_verified_otp=True,
-        )
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
+        existing_user = user_repository.get_by_email(db, signup_info["email"])
+        if existing_user:
+            if existing_user.is_verified_otp:
+                raise http_409_conflict("This email has already been verified by another session.")
+            # If user already existed unverified, activate and update their details
+            existing_user.name = signup_info["name"]
+            existing_user.phone_number = signup_info["phone_number"]
+            existing_user.hashed_password = signup_info["hashed_password"]
+            existing_user.is_verified_otp = True
+            db.add(existing_user)
+            db.commit()
+            db.refresh(existing_user)
+            new_user = existing_user
+        else:
+            # Check phone duplicate before insert
+            phone_user = user_repository.get_by_phone(db, signup_info["phone_number"])
+            if phone_user and phone_user.is_verified_otp:
+                raise http_409_conflict(f"An account with phone number '{signup_info['phone_number']}' already exists.")
+
+            unique_ref_code = self._generate_referral_code(db)
+            new_user = User(
+                name=signup_info["name"],
+                email=signup_info["email"],
+                phone_number=signup_info["phone_number"],
+                hashed_password=signup_info["hashed_password"],
+                role=UserRole.CUSTOMER,
+                referral_code=unique_ref_code,
+                is_active=True,
+                is_verified_otp=True,
+            )
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
 
         # Mark OTP as consumed and link to newly created user_id
         otp_record.user_id = new_user.id
