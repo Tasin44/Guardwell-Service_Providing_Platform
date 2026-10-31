@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Guardwell API - Postman Collection",
-    "description": "Collection for testing Guardwell Authentication and Health Check endpoints.",
+    "name": "Guardwell API - Complete Postman Collection",
+    "description": "Comprehensive Postman collection containing all active endpoints (Health Check, Authentication, Quotes & Service Tickets, and Alert Recipients) with pre-configured environments, headers, and request bodies.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -11,14 +11,29 @@
       "type": "string"
     },
     {
+      "key": "access_token",
+      "value": "PASTE_YOUR_ACCESS_TOKEN_HERE",
+      "type": "string"
+    },
+    {
+      "key": "admin_access_token",
+      "value": "PASTE_ADMIN_ACCESS_TOKEN_HERE",
+      "type": "string"
+    },
+    {
       "key": "reset_token",
-      "value": "your_reset_token_here",
+      "value": "PASTE_PASSWORD_RESET_TOKEN_HERE",
+      "type": "string"
+    },
+    {
+      "key": "quote_id",
+      "value": "1",
       "type": "string"
     }
   ],
   "item": [
     {
-      "name": "Health Check",
+      "name": "1. Health Checks",
       "item": [
         {
           "name": "Root Check",
@@ -47,7 +62,7 @@
       ]
     },
     {
-      "name": "Authentication",
+      "name": "2. Authentication",
       "item": [
         {
           "name": "1. User Signup",
@@ -61,7 +76,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"johndoe@example.com\",\n  \"phone_number\": \"+1-555-0100\",\n  \"password\": \"SecurePass123!\",\n  \"referral_code\": \"GWADMIN1\"\n}"
+              "raw": "{\n  \"name\": \"Alex Mercer\",\n  \"email\": \"alex.mercer@example.com\",\n  \"phone_number\": \"+1-555-0922\",\n  \"password\": \"SecurePass123!\",\n  \"referral_code\": \"GWADMIN1\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/auth/signup",
@@ -82,7 +97,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"johndoe@example.com\",\n  \"otp_code\": \"123456\"\n}"
+              "raw": "{\n  \"email\": \"alex.mercer@example.com\",\n  \"otp_code\": \"123456\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/auth/verify-otp",
@@ -92,7 +107,28 @@
           }
         },
         {
-          "name": "3. User Login",
+          "name": "3. User Login (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alex.mercer@example.com\",\n  \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "4. Admin Login",
           "request": {
             "method": "POST",
             "header": [
@@ -113,7 +149,7 @@
           }
         },
         {
-          "name": "4. Forgot Password",
+          "name": "5. Forgot Password (Request OTP)",
           "request": {
             "method": "POST",
             "header": [
@@ -124,7 +160,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"johndoe@example.com\"\n}"
+              "raw": "{\n  \"email\": \"alex.mercer@example.com\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/auth/forgot-password",
@@ -134,7 +170,7 @@
           }
         },
         {
-          "name": "5. Verify Forgot Password OTP",
+          "name": "6. Verify Forgot Password OTP",
           "request": {
             "method": "POST",
             "header": [
@@ -145,7 +181,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"johndoe@example.com\",\n  \"otp_code\": \"123456\"\n}"
+              "raw": "{\n  \"email\": \"alex.mercer@example.com\",\n  \"otp_code\": \"123456\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/auth/verify-forgot-otp",
@@ -155,7 +191,7 @@
           }
         },
         {
-          "name": "6. Reset Password",
+          "name": "7. Reset Password",
           "request": {
             "method": "POST",
             "header": [
@@ -165,18 +201,250 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{reset_token}}",
-                "description": "Token received from verify-forgot-otp response"
+                "value": "Bearer {{reset_token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"new_password\": \"NewStrongPassword123!\"\n}"
+              "raw": "{\n  \"new_password\": \"BrandNewPassword123!\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/auth/reset-password",
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "auth", "reset-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Quotes & Service Tickets",
+      "item": [
+        {
+          "name": "1. Create Quote / Request Service (Multipart Form)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "description": "Optional: Authenticated user or guest"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "type",
+                  "value": "get_a_free_quote",
+                  "type": "text",
+                  "description": "Options: get_a_free_quote OR request_a_service"
+                },
+                {
+                  "key": "service_category",
+                  "value": "gutter_replacement",
+                  "type": "text",
+                  "description": "Options: gutter_replacement, gutter_guard, soffit, fascia, roofing, fencing, siding, soft_wash, gutter_clean"
+                },
+                {
+                  "key": "name",
+                  "value": "Alex Mercer",
+                  "type": "text"
+                },
+                {
+                  "key": "phone_number",
+                  "value": "+1-555-0922",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "alex.mercer@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "postcode",
+                  "value": "NW1 6XE",
+                  "type": "text"
+                },
+                {
+                  "key": "full_address",
+                  "value": "221B Baker Street, Marylebone, London",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Heavy blockage in front gutters causing water overflow into the porch roof during rains.",
+                  "type": "text"
+                },
+                {
+                  "key": "coupon_code",
+                  "value": "",
+                  "type": "text",
+                  "description": "Optional coupon code"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional image upload (House/gutter photo)"
+                },
+                {
+                  "key": "video",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional video upload"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/quotes/create",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "quotes", "create"]
+            }
+          }
+        },
+        {
+          "name": "2. Get My Submitted Quotes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quotes/my-quotes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "quotes", "my-quotes"]
+            }
+          }
+        },
+        {
+          "name": "3. Get Quote by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quotes/{{quote_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "quotes", "{{quote_id}}"]
+            }
+          }
+        },
+        {
+          "name": "4. [Admin] List All Quotes (with filters)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quotes/admin/all?skip=0&limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "quotes", "admin", "all"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "submitted",
+                  "disabled": true,
+                  "description": "Filter by status: submitted, in_progress, completed"
+                },
+                {
+                  "key": "type",
+                  "value": "get_a_free_quote",
+                  "disabled": true,
+                  "description": "Filter by type: get_a_free_quote, request_a_service"
+                },
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "5. [Admin] Update Quote Status & Assign Rep",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\",\n  \"assigned_rep\": \"David Miller (Senior Inspector)\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/quotes/{{quote_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "quotes", "{{quote_id}}", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Alert Notification Recipients",
+      "item": [
+        {
+          "name": "1. [Admin] List Notification Recipients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quotes/recipients/all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "quotes", "recipients", "all"]
+            }
+          }
+        },
+        {
+          "name": "2. [Admin] Add Notification Recipient",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Emergency Field Ops\",\n  \"email\": \"field-alerts@guardwell.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/quotes/recipients/create",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "quotes", "recipients", "create"]
             }
           }
         }
