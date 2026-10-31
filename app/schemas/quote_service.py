@@ -21,9 +21,9 @@ from fastapi import UploadFile
 
 from app.models.user import User
 from app.models.quote import Quote, QuoteType, ServiceCategory, QuoteStatus, NotificationRecipient
-from app.models.referral import ReferralStatus, BonusStatus, CouponStatus
+# from app.models.referral import ReferralStatus, BonusStatus, CouponStatus
 from app.repositories.quote_repository import quote_repository, notification_recipient_repository
-from app.repositories.referral_repository import referral_repository, coupon_repository
+# from app.repositories.referral_repository import referral_repository, coupon_repository
 from app.services.file_service import file_service
 from app.schemas.quote import QuoteResponse, QuoteStatusUpdateRequest
 from app.core.exceptions import http_400_bad_request, http_404_not_found
@@ -78,15 +78,15 @@ class QuoteService:
             video_url = await file_service.save_upload_file(video_file, subfolder="quotes")
 
         # Validate Coupon if provided
-        applied_coupon = None
-        if coupon_code:
-            applied_coupon = coupon_repository.get_by_code(db, coupon_code.strip())
-            if not applied_coupon or applied_coupon.status != CouponStatus.ACTIVE:
-                raise http_400_bad_request("The coupon code provided is invalid or has already been used.")
+        # applied_coupon = None
+        # if coupon_code:
+        #     applied_coupon = coupon_repository.get_by_code(db, coupon_code.strip())
+        #     if not applied_coupon or applied_coupon.status != CouponStatus.ACTIVE:
+        #         raise http_400_bad_request("The coupon code provided is invalid or has already been used.")
 
-            applied_coupon.status = CouponStatus.USED
-            applied_coupon.used_at = datetime.now(timezone.utc)
-            db.add(applied_coupon)
+        #     applied_coupon.status = CouponStatus.USED
+        #     applied_coupon.used_at = datetime.now(timezone.utc)
+        #     db.add(applied_coupon)
 
         quote = Quote(
             user_id=current_user.id if current_user else None,
@@ -100,7 +100,7 @@ class QuoteService:
             description=description.strip(),
             image_url=image_url,
             video_url=video_url,
-            coupon_id=applied_coupon.id if applied_coupon else None,
+            # coupon_id=applied_coupon.id if applied_coupon else None,
             status=QuoteStatus.SUBMITTED
         )
         db.add(quote)
@@ -109,12 +109,12 @@ class QuoteService:
 
         # Referral Tracking: If customer was referred, advance state to BOOKED
         user_to_check = current_user.id if current_user else None
-        if user_to_check:
-            referral_entry = referral_repository.get_by_referred_user(db, user_to_check)
-            if referral_entry and referral_entry.status == ReferralStatus.SIGNED_UP:
-                referral_entry.status = ReferralStatus.BOOKED
-                db.add(referral_entry)
-                db.commit()
+        # if user_to_check:
+        #     referral_entry = referral_repository.get_by_referred_user(db, user_to_check)
+        #     if referral_entry and referral_entry.status == ReferralStatus.SIGNED_UP:
+        #         referral_entry.status = ReferralStatus.BOOKED
+        #         db.add(referral_entry)
+        #         db.commit()
 
         # Trigger notification to team
         self._notify_admin_team(db, quote)
@@ -143,14 +143,14 @@ class QuoteService:
         db.refresh(quote)
 
         # If job COMPLETED -> Advance referral state to COMPLETED and bonus to PENDING
-        if payload.status == QuoteStatus.COMPLETED and quote.user_id:
-            referral = referral_repository.get_by_referred_user(db, quote.user_id)
-            if referral and referral.status != ReferralStatus.COMPLETED:
-                referral.status = ReferralStatus.COMPLETED
-                referral.bonus_status = BonusStatus.PENDING
-                db.add(referral)
-                db.commit()
-                logger.info(f"Referral #{referral.id} reached COMPLETED status. Bonus marked PENDING for referrer #{referral.referrer_id}")
+        # if payload.status == QuoteStatus.COMPLETED and quote.user_id:
+        #     referral = referral_repository.get_by_referred_user(db, quote.user_id)
+        #     if referral and referral.status != ReferralStatus.COMPLETED:
+        #         referral.status = ReferralStatus.COMPLETED
+        #         referral.bonus_status = BonusStatus.PENDING
+        #         db.add(referral)
+        #         db.commit()
+        #         logger.info(f"Referral #{referral.id} reached COMPLETED status. Bonus marked PENDING for referrer #{referral.referrer_id}")
 
         return QuoteResponse.model_validate(quote)
 
