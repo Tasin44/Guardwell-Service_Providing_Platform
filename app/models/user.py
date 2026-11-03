@@ -1,4 +1,3 @@
-
 """
 ================================================================================
 ARCHITECTURE & DESIGN PATTERN:
@@ -31,6 +30,7 @@ class OTPPurpose(str, enum.Enum):
     SIGNUP = "signup"
     FORGOT_PASSWORD = "forgot_password"
 
+
 class User(TimeStampedModel):
     __tablename__ = "users"
 
@@ -47,18 +47,20 @@ class User(TimeStampedModel):
     image_url = Column(String(500), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     is_verified_otp = Column(Boolean, default=False, nullable=False)
+    is_verified_customer = Column(Boolean, default=False, nullable=False)
+    is_feed_banned = Column(Boolean, default=False, nullable=False)
+    payout_email = Column(String(255), nullable=True)
+    payout_phone = Column(String(50), nullable=True)
 
     # Relationships (Composition & Association)
     # referrals_given = relationship("Referral", foreign_keys="Referral.referrer_id", back_populates="referrer", cascade="all, delete-orphan")
     # referrals_received = relationship("Referral", foreign_keys="Referral.referred_user_id", back_populates="referred_user")
 
     quotes = relationship("Quote", back_populates="user")
-    # posts = relationship("FeedPost", back_populates="user", cascade="all, delete-orphan")
-    # comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
-    # reactions = relationship("CommentReaction", back_populates="user", cascade="all, delete-orphan")
+    posts = relationship("FeedPost", back_populates="user", cascade="all, delete-orphan")
+    comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
+    reactions = relationship("CommentReaction", back_populates="user", cascade="all, delete-orphan")
     otps = relationship("OTPVerification", back_populates="user", cascade="all, delete-orphan")
-
-
 
 
 class OTPVerification(TimeStampedModel):
@@ -80,26 +82,3 @@ class OTPVerification(TimeStampedModel):
     def is_expired(self) -> bool:
         """Helper to quickly evaluate OTP expiration."""
         return datetime.now(timezone.utc) > self.expires_at.replace(tzinfo=timezone.utc)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

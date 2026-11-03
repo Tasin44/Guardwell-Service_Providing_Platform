@@ -34,14 +34,15 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
+    BASE_URL: str = "http://10.10.29.34:8000"
 
-    # Database: SQLite for zero-config local run, easily swappable for Postgres
+    # Database (loaded from .env)
     DATABASE_URL: str = "sqlite:///./guardwell.db"
 
-    # Security & JWT Tokens
-    SECRET_KEY: str = "guardwell-super-secure-production-ready-jwt-secret-key-change-me"
+    # Security & JWT Tokens (loaded from .env — no hardcoded secrets)
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     # Business Logic Defaults
@@ -54,9 +55,9 @@ class Settings(BaseSettings):
     # CORS Configuration
     CORS_ORIGINS: List[str] = ["*"]
 
-    # Initial Admin Credentials (for seed script)
-    FIRST_SUPERUSER_EMAIL: str = "admin@guardwell.com"
-    FIRST_SUPERUSER_PASSWORD: str = "AdminSecretPassword123!"
+    # Initial Admin Credentials (loaded from .env — no hardcoded secrets)
+    FIRST_SUPERUSER_EMAIL: str
+    FIRST_SUPERUSER_PASSWORD: str
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -71,13 +72,3 @@ settings = Settings()
 
 # Ensure uploads directory exists at startup
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-
-
-
-
-
-
-
-
-
-

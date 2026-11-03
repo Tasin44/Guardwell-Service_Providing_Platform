@@ -1,1 +1,7 @@
 practice.py
+.env
+uploads/
+venv/
+__pycache__/
+*.pyc
+guardwell.db

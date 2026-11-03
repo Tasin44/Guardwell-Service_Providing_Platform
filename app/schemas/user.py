@@ -11,7 +11,7 @@ FASTAPI SCHEMAS VS DRF SERIALIZERS (USER PROFILE):
 
 from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict, field_validator
 from app.models.user import UserRole
 
 
@@ -32,6 +32,12 @@ class UserProfileResponse(BaseModel):
     payout_email: Optional[str] = None
     payout_phone: Optional[str] = None
     created_at: datetime
+
+    @field_validator("image_url", mode="before")
+    @classmethod
+    def format_image_url(cls, v: Optional[str]) -> Optional[str]:
+        from app.services.file_service import file_service
+        return file_service.get_full_url(v)
 
     model_config = ConfigDict(from_attributes=True)#❓what does this line doing here
 

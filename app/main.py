@@ -30,6 +30,8 @@ from app.models.quote import NotificationRecipient
 # from app.api.v1.api import api_router
 from app.api.v1.endpoints.auth import router as auth_router
 from app.api.v1.endpoints.quotes import router as quotes_router
+from app.api.v1.endpoints.profile import router as profile_router
+from app.api.v1.endpoints.feed import router as feed_router
 
 def seed_initial_data():
     """
@@ -128,6 +130,8 @@ app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads"
 # app.include_router(api_router)  # Also mount directly for root compatibility
 app.include_router(auth_router, prefix=f"{settings.API_V1_STR}/auth", tags=["Authentication"])
 app.include_router(quotes_router, prefix=f"{settings.API_V1_STR}/quotes", tags=["Quotes & Service Tickets"])
+app.include_router(profile_router, prefix=f"{settings.API_V1_STR}/profile", tags=["User Profile"])
+app.include_router(feed_router, prefix=f"{settings.API_V1_STR}/feed", tags=["Social Feed"])
 
 @app.get("/", tags=["Health Check"])
 def root():

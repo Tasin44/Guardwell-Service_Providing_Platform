@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Guardwell API - Complete Postman Collection",
-    "description": "Comprehensive Postman collection containing all active endpoints (Health Check, Authentication, Quotes & Service Tickets, and Alert Recipients) with pre-configured environments, headers, and request bodies.",
+    "description": "Comprehensive Postman collection containing all active endpoints (Health Check, Authentication, Quotes & Service Tickets, Alert Recipients, User Profile, and Social Community Feed) with pre-configured environments, headers, and request bodies.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -27,6 +27,16 @@
     },
     {
       "key": "quote_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "post_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "comment_id",
       "value": "1",
       "type": "string"
     }
@@ -445,6 +455,269 @@
               "raw": "{{base_url}}/api/v1/quotes/recipients/create",
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "quotes", "recipients", "create"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. User Profile",
+      "item": [
+        {
+          "name": "1. Get Current User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/profile/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "profile", ""]
+            }
+          }
+        },
+        {
+          "name": "2. Update User Profile (Multipart Form)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Alex Mercer Updated",
+                  "type": "text",
+                  "description": "Optional updated full name"
+                },
+                {
+                  "key": "phone_number",
+                  "value": "+1-555-0999",
+                  "type": "text",
+                  "description": "Optional updated phone number"
+                },
+                {
+                  "key": "payout_email",
+                  "value": "alex.payout@example.com",
+                  "type": "text",
+                  "description": "Optional e-transfer payout email"
+                },
+                {
+                  "key": "payout_phone",
+                  "value": "+1-555-0999",
+                  "type": "text",
+                  "description": "Optional e-transfer payout phone"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional profile avatar image"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/profile/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "profile", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Social Community Feed",
+      "item": [
+        {
+          "name": "1. Create Feed Post (Multipart Form)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "post_description",
+                  "value": "Guardwell team did an amazing job installing our new gutter guards today!",
+                  "type": "text",
+                  "description": "Text content of the post (required)"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional photo attachment"
+                },
+                {
+                  "key": "video",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional video attachment"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/feed/create_post/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "feed", "create_post", ""]
+            }
+          }
+        },
+        {
+          "name": "2. Get Public Feed Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/feed/create_post/?skip=0&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "feed", "create_post", ""],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Report an Inappropriate Post (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Spam or irrelevant promotional content.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/feed/report_post/{{post_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "feed", "report_post", "{{post_id}}"]
+            }
+          }
+        },
+        {
+          "name": "4. Report an Inappropriate Post (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Inappropriate language or harassment.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/feed/report_post/{{post_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "feed", "report_post", "{{post_id}}"]
+            }
+          }
+        },
+        {
+          "name": "5. Add Comment to Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment_text\": \"Looks awesome! How long did the installation take?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/feed/create_comment/{{post_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "feed", "create_comment", "{{post_id}}"]
+            }
+          }
+        },
+        {
+          "name": "6. Get All Comments of a Post",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "description": "Optional: Pass token to check user_has_reacted status"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/feed/create_comment/{{post_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "feed", "create_comment", "{{post_id}}"]
+            }
+          }
+        },
+        {
+          "name": "7. Love React / Un-react to Comment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/feed/reaction/{{post_id}}/{{comment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "feed", "reaction", "{{post_id}}", "{{comment_id}}"]
+            }
+          }
+        },
+        {
+          "name": "8. Get All Reactions of a Comment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/feed/reaction/{{post_id}}/{{comment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "feed", "reaction", "{{post_id}}", "{{comment_id}}"]
             }
           }
         }

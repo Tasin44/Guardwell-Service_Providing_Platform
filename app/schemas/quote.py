@@ -13,8 +13,9 @@ FASTAPI SCHEMAS VS DRF SERIALIZERS (QUOTES & INSPECTION TICKETS):
 
 from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, ConfigDict, Field
+from pydantic import BaseModel, EmailStr, ConfigDict, Field, field_validator
 from app.models.quote import QuoteType, ServiceCategory, QuoteStatus
+from app.services.file_service import file_service
 
 
 class QuoteCreateRequest(BaseModel):
@@ -50,6 +51,11 @@ class QuoteResponse(BaseModel):
     assigned_rep: Optional[str] = None
     created_at: datetime
     updated_at: datetime
+
+    @field_validator("image_url", "video_url", mode="before")
+    @classmethod
+    def format_media_urls(cls, v: Optional[str]) -> Optional[str]:
+        return file_service.get_full_url(v)
 
     model_config = ConfigDict(from_attributes=True)
 
