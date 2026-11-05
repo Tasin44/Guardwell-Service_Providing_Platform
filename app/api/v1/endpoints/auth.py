@@ -23,6 +23,7 @@ from app.schemas.auth import (
     ForgotPasswordRequest,
     VerifyForgotOTPRequest,
     ResetPasswordRequest,
+    RefreshTokenRequest,
     TokenResponse,
     ForgotPasswordOTPResponse,
     PasswordResetSuccessResponse,
@@ -70,6 +71,25 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
     Authenticates user and returns JWT token pair.
     """
     return auth_service.login(db, payload)
+
+
+@router.post(
+    "/token/refresh/",
+    response_model=TokenResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Refresh Access & Refresh Tokens"
+)
+@router.post(
+    "/token/refresh",
+    response_model=TokenResponse,
+    status_code=status.HTTP_200_OK,
+    include_in_schema=False
+)
+def refresh_token(payload: RefreshTokenRequest, db: Session = Depends(get_db)):
+    """
+    Accepts a valid refresh_token and returns a new access_token, refresh_token, and user profile.
+    """
+    return auth_service.refresh_access_token(db, payload)
 
 
 @router.post(

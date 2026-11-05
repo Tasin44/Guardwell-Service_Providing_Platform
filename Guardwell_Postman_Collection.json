@@ -16,6 +16,11 @@
       "type": "string"
     },
     {
+      "key": "refresh_token",
+      "value": "PASTE_YOUR_REFRESH_TOKEN_HERE",
+      "type": "string"
+    },
+    {
       "key": "admin_access_token",
       "value": "PASTE_ADMIN_ACCESS_TOKEN_HERE",
       "type": "string"
@@ -222,6 +227,27 @@
               "raw": "{{base_url}}/api/v1/auth/reset-password",
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "auth", "reset-password"]
+            }
+          }
+        },
+        {
+          "name": "8. Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/token/refresh/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "token", "refresh", ""]
             }
           }
         }

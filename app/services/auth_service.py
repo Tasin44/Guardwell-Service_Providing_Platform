@@ -46,6 +46,7 @@ from app.schemas.auth import (
     ForgotPasswordRequest,
     VerifyForgotOTPRequest,
     ResetPasswordRequest,
+    RefreshTokenRequest,
     TokenResponse,
     ForgotPasswordOTPResponse,
     PasswordResetSuccessResponse,
@@ -232,6 +233,39 @@ class AuthService:
         return TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,
+            token_type="bearer",
+            user=user_profile
+        )
+
+    def refresh_access_token(self, db: Session, payload: RefreshTokenRequest) -> TokenResponse:
+        """
+        Validates a refresh token and issues a new access token and refresh token pair.
+        """
+        token_str = payload.refresh_token.replace("Bearer ", "").strip()
+        try:
+            decoded = jwt.decode(token_str, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            if decoded.get("type") != "refresh":
+                raise http_401_unauthorized("Invalid token type. Expected a refresh token.")
+            user_id = int(decoded.get("sub"))
+        except jwt.ExpiredSignatureError:
+            raise http_401_unauthorized("Refresh token has expired. Please login again.")
+        except (jwt.PyJWTError, Exception):
+            raise http_401_unauthorized("Invalid refresh token.")
+
+        user = user_repository.get(db, user_id)
+        if not user:
+            raise http_404_not_found("User not found.")
+
+        if not user.is_active:
+            raise http_400_bad_request("This account has been deactivated.")
+
+        access_token = create_access_token(subject=user.id, claims={"role": user.role.value, "email": user.email})
+        new_refresh_token = create_refresh_token(subject=user.id)
+        user_profile = UserProfileResponse.model_validate(user)
+
+        return TokenResponse(
+            access_token=access_token,
+            refresh_token=new_refresh_token,
             token_type="bearer",
             user=user_profile
         )
