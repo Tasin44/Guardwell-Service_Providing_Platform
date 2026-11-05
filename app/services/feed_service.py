@@ -89,6 +89,7 @@ class FeedService:
             image_url=post.image_url,
             video_url=post.video_url,
             comment_count=0,
+            like_count=0,
             created_at=post.created_at
         )
 
@@ -101,6 +102,7 @@ class FeedService:
 
         for p in posts:
             comment_count = feed_post_repository.count_comments(db, p.id)
+            like_count = feed_post_repository.count_likes(db, p.id)
             results.append(
                 PostResponse(
                     id=p.id,
@@ -111,6 +113,7 @@ class FeedService:
                     image_url=p.image_url,
                     video_url=p.video_url,
                     comment_count=comment_count,
+                    like_count=like_count,
                     created_at=p.created_at
                 )
             )
@@ -304,4 +307,3 @@ class FeedService:
 
 
 feed_service = FeedService()
-

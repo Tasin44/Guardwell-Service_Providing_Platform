@@ -36,6 +36,16 @@ class FeedPostRepository(BaseRepository[FeedPost]):
         """Returns total comments count for a post."""
         return db.query(func.count(Comment.id)).filter(Comment.post_id == post_id).scalar() or 0
 
+    def count_likes(self, db: Session, post_id: int) -> int:
+        """Returns total likes/reactions count for a post."""
+        return (
+            db.query(func.count(CommentReaction.id))
+            .join(Comment, CommentReaction.comment_id == Comment.id)
+            .filter(Comment.post_id == post_id)
+            .scalar()
+            or 0
+        )
+
 
 class PostReportRepository(BaseRepository[PostReport]):
     def __init__(self):
