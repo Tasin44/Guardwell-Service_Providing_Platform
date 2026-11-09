@@ -44,6 +44,21 @@
       "key": "comment_id",
       "value": "1",
       "type": "string"
+    },
+    {
+      "key": "customer_user_id",
+      "value": "4",
+      "type": "string"
+    },
+    {
+      "key": "referral_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "report_id",
+      "value": "1",
+      "type": "string"
     }
   ],
   "item": [
@@ -744,6 +759,306 @@
               "raw": "{{base_url}}/api/v1/feed/reaction/{{post_id}}/{{comment_id}}",
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "feed", "reaction", "{{post_id}}", "{{comment_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Admin Dashboard & Operations",
+      "item": [
+        {
+          "name": "1. Dashboard Overview Stats & Graphs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/dashboard/overview",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "dashboard", "overview"]
+            }
+          }
+        },
+        {
+          "name": "2. Customer Management - List All Customers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/customers?skip=0&limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "customers"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "search",
+                  "value": "John",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Customer Management - Customer Full Profile & Tickets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/customers/{{customer_user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "customers", "{{customer_user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "4. Customer Management - Verify Customer / Feed Ban",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_verified_customer\": true,\n  \"is_feed_banned\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/customers/{{customer_user_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "customers", "{{customer_user_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "5. Service Tickets - List All Requests / Issues",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/tickets?skip=0&limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "tickets"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "submitted",
+                  "disabled": true,
+                  "description": "submitted, in_progress, completed"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "6. Service Tickets - Update Status (In progress -> Completed)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\",\n  \"assigned_rep\": \"Alex Turner (Operations)\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/tickets/{{quote_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "tickets", "{{quote_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "7. Referrals - List All Referrals and Bonuses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/referrals?skip=0&limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "referrals"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "8. Referrals - Update Bonus Status (Mark Paid / Pending)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bonus_status\": \"paid\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/referrals/{{referral_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "referrals", "{{referral_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "9. Coupons - Get Current Global Coupon Reward Amount",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/coupons/amount",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "coupons", "amount"]
+            }
+          }
+        },
+        {
+          "name": "10. Coupons - Update Global Coupon Reward Amount",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coupon_amount\": 100.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/coupons/amount",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "coupons", "amount"]
+            }
+          }
+        },
+        {
+          "name": "11. Feed Moderation - List Reported Posts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/reports?skip=0&limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "reports"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "12. Feed Moderation - Action on Report (Delete Post / Dismiss)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"delete_post\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/reports/{{report_id}}/action",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "reports", "{{report_id}}", "action"]
             }
           }
         }
