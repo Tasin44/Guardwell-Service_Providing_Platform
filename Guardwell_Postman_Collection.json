@@ -1063,6 +1063,52 @@
           }
         }
       ]
+    },
+    {
+      "name": "8. AI Home Designer",
+      "item": [
+        {
+          "name": "1. Ask AI - Redesign Room Photo (Multipart Form)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "description": "Optional"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "Photo of your kitchen, bathroom, dining room, living room, etc."
+                },
+                {
+                  "key": "prompt",
+                  "value": "Change the cabinet color to warm sage green, add brushed brass handles and modern pendant lights to make it look clean and inviting.",
+                  "type": "text",
+                  "description": "Your color, item, or style preferences"
+                },
+                {
+                  "key": "room_type",
+                  "value": "kitchen",
+                  "type": "text",
+                  "description": "Optional: kitchen, bathroom, dining_room, living_room, bedroom, exterior"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/ask_ai/",
+              "host": ["{{base_url}}"],
+              "path": ["ask_ai", ""]
+            }
+          }
+        }
+      ]
     }
   ]
 }

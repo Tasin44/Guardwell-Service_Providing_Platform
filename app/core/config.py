@@ -59,6 +59,10 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER_EMAIL: str
     FIRST_SUPERUSER_PASSWORD: str
 
+    # Gemini AI Configuration (loaded from .env)
+    GEMINI_API_KEY: str = ""
+    GEMINI_IMAGE_MODEL: str = "gemini-2.5-flash-image"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
