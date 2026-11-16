@@ -10,15 +10,6 @@
 
 A production-grade, asynchronous enterprise backend powering **Guardwell** — a home protection and exterior renovation services platform. The system features AI-driven multimodal image redesign (Google Gemini), high-throughput service ticket dispatching, viral referral growth loops with dynamic coupons, community feed with moderation pipelines, and an executive administration engine built using **Clean Layered Architecture (Controller-Service-Repository Pattern)**.
 
----
-
-## 📌 Resume Snapshot
-
-> **Guardwell — AI-Powered Home Protection & Service Logistics Platform — Backend | [GitHub]**  
-> Scalable, asynchronous service logistics and community backend built with FastAPI, SQLAlchemy 2.0, and Clean Architecture, featuring Google Gemini multimodal image-to-image room redesign, JWT/OTP dual-stage authentication, atomic referral discount pipelines, and real-time operational admin analytics.  
-> **Technologies:** Python 3.14+, FastAPI, SQLAlchemy 2.0, Pydantic v2, Google Gemini API (`google-genai`), PyJWT, Bcrypt, SQLAdmin, AIOFiles, SQLite/PostgreSQL, REST APIs.
-
----
 
 ## 🏗️ Architecture & Design Patterns
 
